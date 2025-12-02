@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dieline Generator</title>
+  <style>
+    :root {
+      --bg: #0b1115;
+      --panel: #0f1a21;
+      --border: #1f2d36;
+      --primary: #3ad0c3;
+      --accent: #f2b84b;
+      --muted: #8aa2b2;
+      --text: #e5eef5;
+      --danger: #ef7171;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(58, 208, 195, 0.08), transparent 25%),
+        radial-gradient(circle at 80% 10%, rgba(242, 184, 75, 0.08), transparent 20%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: 64px 1fr;
+    }
+
+    header {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(120deg, rgba(58, 208, 195, 0.08), transparent);
+    }
+
+    header h1 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0.5px;
+    }
+
+    header .pill {
+      background: rgba(58, 208, 195, 0.1);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 50px;
+      font-size: 12px;
+    }
+
+    header .cta {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+    }
+
+    .btn.primary {
+      background: linear-gradient(90deg, #3ad0c3, #0fb1c5);
+      border-color: transparent;
+      color: #0a0f12;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--primary);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 320px 1fr 340px;
+      min-height: calc(100vh - 64px);
+    }
+
+    aside, section, .side-panel {
+      border-right: 1px solid var(--border);
+      background: rgba(15, 26, 33, 0.7);
+      backdrop-filter: blur(6px);
+    }
+
+    aside {
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .side-panel {
+      padding: 20px;
+      border-right: none;
+      border-left: 1px solid var(--border);
+    }
+
+    .label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input, select {
+      background: #0c1419;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: var(--text);
+      width: 100%;
+      font-size: 14px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .card {
+      background: #0d141a;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      letter-spacing: 0.3px;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pill-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color 120ms ease, background 120ms ease;
+    }
+
+    .pill-option input {
+      accent-color: var(--primary);
+    }
+
+    .pill-option:hover {
+      border-color: var(--primary);
+      background: rgba(58, 208, 195, 0.05);
+    }
+
+    .canvas-container {
+      position: relative;
+      background: radial-gradient(circle at 20% 20%, rgba(58, 208, 195, 0.05), transparent 25%),
+        #0b1115;
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .toolbar {
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .preview-area {
+      position: relative;
+      padding: 16px;
+    }
+
+    #dieline {
+      width: 100%;
+      height: 520px;
+      background: #0c131a;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: inset 0 0 0 1px rgba(58, 208, 195, 0.1);
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .legend span::before {
+      content: "";
+      display: inline-block;
+      width: 14px;
+      height: 3px;
+      border-radius: 2px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .legend .cut::before { background: var(--text); }
+    .legend .crease::before { background: var(--primary); }
+    .legend .fold::before { background: var(--danger); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #0d151b;
+    }
+
+    .stat small { color: var(--muted); }
+
+    .cube {
+      position: relative;
+      width: 180px;
+      height: 120px;
+      transform-style: preserve-3d;
+      transform: rotateX(-18deg) rotateY(30deg);
+      animation: float 7s ease-in-out infinite alternate;
+      margin: 30px auto;
+    }
+
+    .cube .face {
+      position: absolute;
+      background: repeating-linear-gradient(45deg, #9d784c, #9d784c 12px, #b08b5b 12px, #b08b5b 24px);
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      opacity: 0.95;
+    }
+
+    .face.front { width: 180px; height: 120px; transform: translateZ(var(--depth)); }
+    .face.back { width: 180px; height: 120px; transform: rotateY(180deg) translateZ(calc(var(--depth) * -1)); }
+    .face.left { width: calc(var(--depth)*2); height: 120px; transform: rotateY(-90deg) translateZ(calc(var(--depth))); }
+    .face.right { width: calc(var(--depth)*2); height: 120px; transform: rotateY(90deg) translateZ(180px); }
+    .face.top { width: 180px; height: calc(var(--depth)*2); transform: rotateX(90deg) translateZ(calc(var(--depth))); }
+    .face.bottom { width: 180px; height: calc(var(--depth)*2); transform: rotateX(-90deg) translateZ(120px); }
+
+    @keyframes float {
+      from { transform: rotateX(-18deg) rotateY(30deg) translateY(0); }
+      to { transform: rotateX(-18deg) rotateY(35deg) translateY(-10px); }
+    }
+
+    .small-label { font-size: 12px; color: var(--muted); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 14px 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 1080px) {
+      main { grid-template-columns: 1fr; }
+      aside, .side-panel { border: none; }
+      .canvas-container { border: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔷 Dieline Generator <span class="pill">beta</span></h1>
+    <div class="cta">
+      <button class="btn">Design Online</button>
+      <button class="btn primary" id="download">Download dieline (SVG)</button>
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <div class="card">
+        <h3>Custom size</h3>
+        <div class="label">Outer dimensions (inches)</div>
+        <div class="input-row">
+          <div class="field">
+            <small class="label">Width</small>
+            <input class="input" id="width" type="number" step="0.001" value="12.0625">
+          </div>
+          <div class="field">
+            <small class="label">Depth</small>
+            <input class="input" id="depth" type="number" step="0.001" value="7.25">
+          </div>
+          <div class="field">
+            <small class="label">Height</small>
+            <input class="input" id="height" type="number" step="0.001" value="2.9375">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Board options</h3>
+        <div class="stack">
+          <div class="field">
+            <div class="label">Board thickness (in)</div>
+            <input class="input" id="thickness" type="number" step="0.001" value="0.057">
+          </div>
+          <div class="field">
+            <div class="label">Material</div>
+            <select id="material" class="input">
+              <option>E-flute</option>
+              <option>Solid bleached sulfate</option>
+              <option>Kraft paper</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Features</h3>
+        <div class="stack">
+          <label class="pill-option"><input id="hasWindow" type="checkbox"> Window cutout</label>
+          <label class="pill-option"><input id="hasHandle" type="checkbox"> Carry handle</label>
+          <label class="pill-option"><input id="hasClosure" type="checkbox" checked> Dust flaps</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Flip to the open side</h3>
+        <div class="stack">
+          <label class="pill-option"><input name="orientation" type="radio" value="left" checked> Left</label>
+          <label class="pill-option"><input name="orientation" type="radio" value="right"> Right</label>
+        </div>
+      </div>
+    </aside>
+
+    <section class="canvas-container">
+      <div class="toolbar">
+        <button class="btn" id="reset">Reset</button>
+        <button class="btn" id="export">Export PNG</button>
+        <span class="small-label">All dimensions in inches · double-click to recenter</span>
+      </div>
+      <div class="preview-area">
+        <svg id="dieline" viewBox="0 0 960 540"></svg>
+        <div class="legend">
+          <span class="cut">Cut</span>
+          <span class="crease">Crease</span>
+          <span class="fold">Glue</span>
+        </div>
+        <div class="stats" id="stats"></div>
+      </div>
+    </section>
+
+    <div class="side-panel">
+      <div class="card">
+        <h3>3D preview</h3>
+        <div class="cube" id="cube" style="--depth: 70px;">
+          <div class="face front"></div>
+          <div class="face back"></div>
+          <div class="face left"></div>
+          <div class="face right"></div>
+          <div class="face top"></div>
+          <div class="face bottom"></div>
+        </div>
+        <div class="stack">
+          <div class="field">
+            <div class="label">Model</div>
+            <select class="input" disabled>
+              <option>Mailer box (locked)</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="label">Texture</div>
+            <select class="input" id="texture">
+              <option value="kraft">Kraft paper</option>
+              <option value="white">White board</option>
+              <option value="print">Branded print</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>File formats</h3>
+        <div class="stack">
+          <button class="btn">AI dieline</button>
+          <button class="btn">PDF dieline</button>
+          <button class="btn">KLD dieline</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Built as a lightweight demo. Adjust the dimensions to update the dieline and 3D box preview.
+  </footer>
+
+  <script>
+    const svg = document.getElementById('dieline');
+    const stats = document.getElementById('stats');
+    const inputs = ['width', 'depth', 'height', 'thickness'];
+
+    function getValues() {
+      const values = {};
+      inputs.forEach((id) => (values[id] = parseFloat(document.getElementById(id).value) || 0));
+      values.material = document.getElementById('material').value;
+      values.hasWindow = document.getElementById('hasWindow').checked;
+      values.hasHandle = document.getElementById('hasHandle').checked;
+      values.hasClosure = document.getElementById('hasClosure').checked;
+      values.orientation = document.querySelector('input[name="orientation"]:checked').value;
+      return values;
+    }
+
+    function drawDieline() {
+      const { width: w, depth: d, height: h, thickness: t } = getValues();
+      const totalW = w + 2 * h;
+      const totalH = d + 2 * h;
+      const margin = 40;
+      const scale = Math.min((svg.clientWidth - margin * 2) / totalW, (svg.clientHeight - margin * 2) / totalH);
+
+      const originX = (svg.clientWidth - totalW * scale) / 2;
+      const originY = (svg.clientHeight - totalH * scale) / 2;
+
+      svg.innerHTML = '';
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('font-family', 'Inter, sans-serif');
+      g.setAttribute('stroke-linejoin', 'round');
+      svg.appendChild(g);
+
+      function rect(x, y, rw, rh, color, dash) {
+        const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        r.setAttribute('x', originX + x * scale);
+        r.setAttribute('y', originY + y * scale);
+        r.setAttribute('width', rw * scale);
+        r.setAttribute('height', rh * scale);
+        r.setAttribute('fill', 'none');
+        r.setAttribute('stroke', color);
+        r.setAttribute('stroke-width', 2);
+        if (dash) r.setAttribute('stroke-dasharray', dash);
+        g.appendChild(r);
+        return r;
+      }
+
+      function text(x, y, content) {
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', originX + x * scale);
+        t.setAttribute('y', originY + y * scale);
+        t.setAttribute('fill', '#8aa2b2');
+        t.setAttribute('font-size', 12);
+        t.textContent = content;
+        g.appendChild(t);
+      }
+
+      // Main body and flaps
+      rect(h, h, w, d, '#e5eef5'); // main panel
+      rect(h, 0, w, h, '#3ad0c3', '6 6'); // top flap
+      rect(h, h + d, w, h, '#3ad0c3', '6 6'); // bottom flap
+      rect(0, h, h, d, '#3ad0c3', '6 6'); // left
+      rect(h + w, h, h, d, '#3ad0c3', '6 6'); // right
+
+      // Glue flap
+      rect(h + w + h - h * 0.35, h + d * 0.25, h * 0.35, d * 0.5, '#ef7171', '8 6');
+
+      // Optional features
+      const { hasWindow, hasHandle } = getValues();
+      if (hasWindow) {
+        rect(h + w * 0.3, h + d * 0.3, w * 0.4, d * 0.4, '#f2b84b', '4 4');
+      }
+      if (hasHandle) {
+        const handle = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const cx = originX + (h + w / 2) * scale;
+        const cy = originY + (h * 0.4) * scale;
+        const r = (w * 0.35) * scale;
+        handle.setAttribute('d', `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`);
+        handle.setAttribute('fill', 'none');
+        handle.setAttribute('stroke', '#f2b84b');
+        handle.setAttribute('stroke-width', 2);
+        g.appendChild(handle);
+      }
+
+      // Dimensions
+      const dimColor = '#8aa2b2';
+      const dim = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      dim.setAttribute('stroke', dimColor);
+      dim.setAttribute('stroke-width', 1.5);
+      dim.setAttribute('marker-start', 'url(#arrow)');
+      dim.setAttribute('marker-end', 'url(#arrow)');
+      g.appendChild(dim);
+
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      defs.innerHTML = `<marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="${dimColor}"/></marker>`;
+      g.appendChild(defs);
+
+      function dimensionLine(x1, y1, x2, y2, label) {
+        const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l.setAttribute('x1', originX + x1 * scale);
+        l.setAttribute('y1', originY + y1 * scale);
+        l.setAttribute('x2', originX + x2 * scale);
+        l.setAttribute('y2', originY + y2 * scale);
+        l.setAttribute('stroke', dimColor);
+        l.setAttribute('marker-start', 'url(#arrow)');
+        l.setAttribute('marker-end', 'url(#arrow)');
+        dim.appendChild(l);
+        text((x1 + x2) / 2, (y1 + y2) / 2 - 0.2, label);
+      }
+
+      dimensionLine(h, h - 0.3, h + w, h - 0.3, `${w.toFixed(4)} in`);
+      dimensionLine(h + w + h + 0.3, h, h + w + h + 0.3, h + d, `${d.toFixed(4)} in`);
+      dimensionLine(h - 0.3, 0, h - 0.3, h, `${h.toFixed(4)} in`);
+
+      stats.innerHTML = '';
+      const panels = [
+        { label: 'Outer dimensions', value: `${w.toFixed(4)} × ${d.toFixed(4)} × ${h.toFixed(4)} in` },
+        { label: 'Inner dimensions', value: `${(w - 2 * t).toFixed(4)} × ${(d - 2 * t).toFixed(4)} × ${(h - t).toFixed(4)} in` },
+        { label: 'Layout size', value: `${(totalW).toFixed(3)} × ${(totalH).toFixed(3)} in` },
+        { label: 'Board', value: `${document.getElementById('material').value} · ${t.toFixed(3)}"` },
+        { label: 'Orientation', value: document.querySelector('input[name="orientation"]:checked').value },
+        { label: 'Extras', value: [`Window: ${hasWindow ? 'yes' : 'no'}`, `Handle: ${hasHandle ? 'yes' : 'no'}`].join(' · ') }
+      ];
+
+      panels.forEach((p) => {
+        const div = document.createElement('div');
+        div.className = 'stat';
+        div.innerHTML = `<small>${p.label}</small><div>${p.value}</div>`;
+        stats.appendChild(div);
+      });
+
+      updateCube();
+    }
+
+    function updateCube() {
+      const cube = document.getElementById('cube');
+      const { width: w, depth: d, height: h } = getValues();
+      const scale = 6;
+      const depth = Math.max(30, Math.min(120, d * scale * 0.35));
+      cube.style.setProperty('--depth', `${depth}px`);
+      cube.style.width = `${Math.max(140, w * scale * 0.25)}px`;
+      cube.style.height = `${Math.max(90, h * scale * 0.4)}px`;
+
+      const texture = document.getElementById('texture').value;
+      let bg;
+      if (texture === 'white') {
+        bg = '#f7f7f7';
+      } else if (texture === 'print') {
+        bg = 'repeating-linear-gradient(45deg, #5d8cf6, #5d8cf6 14px, #6de9cf 14px, #6de9cf 28px)';
+      } else {
+        bg = 'repeating-linear-gradient(45deg, #9d784c, #9d784c 12px, #b08b5b 12px, #b08b5b 24px)';
+      }
+      cube.querySelectorAll('.face').forEach((f) => (f.style.background = bg));
+    }
+
+    function downloadSVG() {
+      const serializer = new XMLSerializer();
+      const source = serializer.serializeToString(svg);
+      const blob = new Blob([source], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dieline.svg';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportPNG() {
+      const xml = new XMLSerializer().serializeToString(svg);
+      const svg64 = btoa(unescape(encodeURIComponent(xml)));
+      const image64 = 'data:image/svg+xml;base64,' + svg64;
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = svg.clientWidth;
+        canvas.height = svg.clientHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'dieline.png';
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+      };
+      img.src = image64;
+    }
+
+    document.getElementById('download').addEventListener('click', downloadSVG);
+    document.getElementById('export').addEventListener('click', exportPNG);
+    document.getElementById('reset').addEventListener('click', () => {
+      document.getElementById('width').value = 12.0625;
+      document.getElementById('depth').value = 7.25;
+      document.getElementById('height').value = 2.9375;
+      document.getElementById('thickness').value = 0.057;
+      document.getElementById('hasWindow').checked = false;
+      document.getElementById('hasHandle').checked = false;
+      document.getElementById('hasClosure').checked = true;
+      document.querySelector('input[name="orientation"][value="left"]').checked = true;
+      drawDieline();
+    });
+
+    ['width', 'depth', 'height', 'thickness', 'material', 'texture'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', drawDieline);
+    });
+
+    ['hasWindow', 'hasHandle', 'hasClosure'].forEach((id) => {
+      document.getElementById(id).addEventListener('change', drawDieline);
+    });
+
+    document.querySelectorAll('input[name="orientation"]').forEach((input) => {
+      input.addEventListener('change', drawDieline);
+    });
+
+    svg.addEventListener('dblclick', () => {
+      svg.setAttribute('viewBox', '0 0 960 540');
+      drawDieline();
+    });
+
+    window.addEventListener('resize', drawDieline);
+    drawDieline();
+  </script>
+</body>
+</html>
