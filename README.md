@@ -1,28 +1,17 @@
-# Arka2.0 Dieline Generator (Next.js)
+# Arka2.0 Dieline Demo
 
-A rebuild of the dieline + 3D preview prototype using a small Next.js app. It computes a flip-top mailer dieline from Length/Width/Height/Thickness inputs, renders a labeled SVG, and shows a synced Three.js folding preview.
+A single-page dieline generator demo with interactive dimensions, features, and a CSS-only 3D preview.
 
-## Features
-- Parameterized dieline math (outer dims derived from inputs) rendered as layered SVG cut/crease lines.
-- Three.js folding preview that rotates panels around crease pivots with a fold slider.
-- Downloadable SVG export that uses the same geometry as the on-screen dieline.
-- Minimal utility CSS to style the control panel and previews without extra frameworks.
-
-## Getting started
-1. Install dependencies (Node 18+ recommended):
+## Run locally
+1. Ensure you have Python 3 installed.
+2. From the project root, start a simple web server:
    ```bash
-   npm install
+   python -m http.server 8000
    ```
-2. Run the dev server:
-   ```bash
-   npm run dev
-   ```
-3. Open [http://localhost:3000](http://localhost:3000) to use the generator. Adjust dimensions and the fold slider to see the SVG and 3D preview update, or click **Download SVG dieline** to save the vector output.
+3. Open your browser to http://localhost:8000 and load `index.html`.
 
-> If you prefer a static export, run `npm run build` then `npm run start` for a production server.
-
-## Testing and validation
-- Lint the project: `npm run lint`
-- Build the production bundle: `npm run build`
-
-> Note: Dependency installation requires access to the npm registry. If you encounter HTTP 403 errors when running `npm install`, verify proxy/network settings or try again from an environment with unrestricted registry access.
+## Basic usage
+- Adjust width, depth, height, and board thickness to redraw the dieline and 3D preview.
+- Toggle optional features (window, handle, dust flaps) and orientation to see updates.
+- Use **Download dieline (SVG)** or **Export PNG** to save the current layout.
+- Double-click the SVG canvas to recenter the view; **Reset** restores defaults.
